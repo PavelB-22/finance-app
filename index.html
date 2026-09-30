@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Финансы">
+<meta name="theme-color" content="#0b0f1a">
+<title>Финансы</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="hero">
+    <div class="hero-top">
+      <span class="hero-title">Мои финансы</span>
+      <button class="icon-btn" id="menuBtn" aria-label="Меню">⋯</button>
+    </div>
+    <div class="balance-label">Текущий баланс</div>
+    <div class="balance" id="balance">0 ₽</div>
+    <div class="hero-bar">
+      <div class="hero-bar-fill" id="balanceBar"></div>
+    </div>
+    <div class="hero-legend">
+      <span>Расходы</span>
+      <span id="ratioText">0% от доходов</span>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="overview">Обзор</button>
+    <button class="tab" data-tab="income">Доходы</button>
+    <button class="tab" data-tab="expenses">Расходы</button>
+    <button class="tab" data-tab="analytics">Анализ</button>
+  </nav>
+
+  <main class="content">
+
+    <!-- ОБЗОР -->
+    <section class="tab-content active" id="overview">
+      <div class="stats-grid">
+        <div class="stat-card income-card">
+          <div class="stat-icon">📈</div>
+          <div class="stat-label">Доходы</div>
+          <div class="stat-value" id="total-income">0 ₽</div>
+        </div>
+        <div class="stat-card expense-card">
+          <div class="stat-icon">📉</div>
+          <div class="stat-label">Расходы</div>
+          <div class="stat-value" id="total-expenses">0 ₽</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Куда уходят деньги</h2>
+          <span class="card-sub" id="expenseCount">0 операций</span>
+        </div>
+        <div class="donut-wrap">
+          <canvas id="expenseChart"></canvas>
+          <div class="donut-center">
+            <div class="donut-center-label">Всего</div>
+            <div class="donut-center-value" id="donutTotal">0 ₽</div>
+          </div>
+        </div>
+        <div class="group-list" id="groupList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Последние 30 дней</h2>
+        </div>
+        <canvas id="trendChart"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Последние операции</h2></div>
+        <div id="recent-list"></div>
+      </div>
+    </section>
+
+    <!-- ДОХОДЫ -->
+    <section class="tab-content" id="income">
+      <div class="card">
+        <div class="card-head"><h2>Добавить доход</h2></div>
+        <form id="income-form" class="form">
+          <label class="field">
+            <span>Группа</span>
+            <select name="category" required>
+              <option value="">Выбери группу</option>
+              <option value="salary">💼 Зарплата</option>
+              <option value="advance">💵 Аванс</option>
+              <option value="bonus">🎁 Премия / бонус</option>
+              <option value="freelance">💻 Фриланс / подработка</option>
+              <option value="business">🏢 Бизнес</option>
+              <option value="investment">📊 Инвестиции / дивиденды</option>
+              <option value="rent">🏠 Сдача жилья</option>
+              <option value="cashback">💳 Кэшбэк</option>
+              <option value="sale">📦 Продажа вещей</option>
+              <option value="debt">🤝 Возврат долга</option>
+              <option value="gift">🎉 Подарок</option>
+              <option value="other-income">💰 Другое</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Сумма, ₽</span>
+            <input type="number" name="amount" inputmode="decimal" placeholder="0" required min="0" step="0.01">
+          </label>
+          <label class="field">
+            <span>Описание</span>
+            <input type="text" name="description" placeholder="Необязательно">
+          </label>
+          <label class="field">
+            <span>Дата</span>
+            <input type="date" name="date" required>
+          </label>
+          <button type="submit" class="btn btn-income">Добавить доход</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>История доходов</h2></div>
+        <div id="income-list"></div>
+      </div>
+    </section>
+
+    <!-- РАСХОДЫ -->
+    <section class="tab-content" id="expenses">
+      <div class="card">
+        <div class="card-head"><h2>Добавить расход</h2></div>
+        <form id="expense-form" class="form">
+          <label class="field">
+            <span>Группа</span>
+            <select name="category" required>
+              <option value="">Выбери группу</option>
+              <optgroup label="Ежедневное">
+                <option value="food">🍕 Продукты</option>
+                <option value="cafe">☕️ Кафе и доставка</option>
+                <option value="transport">🚗 Транспорт / бензин</option>
+                <option value="taxi">🚕 Такси</option>
+              </optgroup>
+              <optgroup label="Обязательное">
+                <option value="housing">🏠 Жильё / аренда</option>
+                <option value="utilities">💡 Коммуналка</option>
+                <option value="credit">💳 Кредиты и ипотека</option>
+                <option value="cards">🔁 Платежи по картам</option>
+                <option value="phone">📱 Связь и интернет</option>
+                <option value="insurance">🛡 Страховка</option>
+                <option value="taxes">🧾 Налоги и сборы</option>
+                <option value="kids">👶 Дети / садик</option>
+              </optgroup>
+              <optgroup label="Здоровье и развитие">
+                <option value="health">💊 Здоровье / аптека</option>
+                <option value="doctors">🩺 Врачи и анализы</option>
+                <option value="sport">⚽️ Спорт и зал</option>
+                <option value="education">📚 Образование</option>
+                <option value="books">📖 Книги и курсы</option>
+              </optgroup>
+              <optgroup label="Жизнь и радость">
+                <option value="shopping">🛍 Одежда и покупки</option>
+                <option value="beauty">💄 Красота и уход</option>
+                <option value="entertainment">🎮 Развлечения</option>
+                <option value="travel">✈️ Отпуск и поездки</option>
+                <option value="pets">🐾 Питомцы</option>
+                <option value="gifts">🎁 Подарки</option>
+                <option value="charity">❤️ Помощь и донаты</option>
+              </optgroup>
+              <optgroup label="Прочее">
+                <option value="savings">🏦 Накопления</option>
+                <option value="other">📦 Другое</option>
+              </optgroup>
+            </select>
+          </label>
+          <label class="field">
+            <span>Сумма, ₽</span>
+            <input type="number" name="amount" inputmode="decimal" placeholder="0" required min="0" step="0.01">
+          </label>
+          <label class="field">
+            <span>Описание</span>
+            <input type="text" name="description" placeholder="Необязательно">
+          </label>
+          <label class="field">
+            <span>Дата</span>
+            <input type="date" name="date" required>
+          </label>
+          <button type="submit" class="btn btn-expense">Добавить расход</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>История расходов</h2></div>
+        <div id="expense-list"></div>
+      </div>
+    </section>
+
+    <!-- АНАЛИЗ -->
+    <section class="tab-content" id="analytics">
+      <div class="card">
+        <div class="card-head"><h2>Расходы по группам</h2></div>
+        <div class="bars" id="barsList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Фильтр по периоду</h2></div>
+        <div class="chips" id="periodChips">
+          <button class="chip active" data-period="all">Всё время</button>
+          <button class="chip" data-period="month">Этот месяц</button>
+          <button class="chip" data-period="7">7 дней</button>
+          <button class="chip" data-period="30">30 дней</button>
+        </div>
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <div class="mini-label">Доходы</div>
+            <div class="mini-value income-text" id="filter-income">0 ₽</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-label">Расходы</div>
+            <div class="mini-value expense-text" id="filter-expense">0 ₽</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-label">Итог</div>
+            <div class="mini-value" id="filter-total">0 ₽</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Данные</h2></div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="exportBtn">Экспорт в CSV</button>
+          <button class="btn btn-ghost" id="importBtn">Импорт из CSV</button>
+          <button class="btn btn-ghost danger" id="clearBtn">Очистить всё</button>
+        </div>
+        <input type="file" id="importFile" accept=".csv,text/csv" hidden>
+        <p class="hint">Данные хранятся только в этом браузере, на сервер ничего не уходит. Экспорт сохрани в заметки — это твоя резервная копия.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <button class="fab" id="fab" aria-label="Быстрое добавление">+</button>
+
+  <div class="sheet-backdrop" id="sheetBackdrop"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <h3>Быстрое добавление</h3>
+    <div class="quick-row">
+      <button class="quick-btn income" data-quick="income">➕ Доход</button>
+      <button class="quick-btn expense" data-quick="expense">➖ Расход</button>
+    </div>
+    <p class="hint">Откроет нужную вкладку с формой — просто заполни сумму.</p>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
