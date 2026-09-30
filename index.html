@@ -1,265 +1,227 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Финансы">
-<meta name="theme-color" content="#0b0f1a">
-<title>Финансы</title>
+<meta name="theme-color" content="#0c0e14">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
-<div class="app">
-
-  <header class="hero">
-    <div class="hero-top">
-      <span class="hero-title">Мои финансы</span>
-      <button class="icon-btn" id="menuBtn" aria-label="Меню">⋯</button>
-    </div>
-    <div class="balance-label">Текущий баланс</div>
-    <div class="balance" id="balance">0 ₽</div>
-    <div class="hero-bar">
-      <div class="hero-bar-fill" id="balanceBar"></div>
-    </div>
-    <div class="hero-legend">
-      <span>Расходы</span>
-      <span id="ratioText">0% от доходов</span>
-    </div>
-  </header>
-
-  <nav class="tabs">
-    <button class="tab active" data-tab="overview">Обзор</button>
-    <button class="tab" data-tab="income">Доходы</button>
-    <button class="tab" data-tab="expenses">Расходы</button>
-    <button class="tab" data-tab="analytics">Анализ</button>
-  </nav>
-
-  <main class="content">
-
-    <!-- ОБЗОР -->
-    <section class="tab-content active" id="overview">
-      <div class="stats-grid">
-        <div class="stat-card income-card">
-          <div class="stat-icon">📈</div>
-          <div class="stat-label">Доходы</div>
-          <div class="stat-value" id="total-income">0 ₽</div>
-        </div>
-        <div class="stat-card expense-card">
-          <div class="stat-icon">📉</div>
-          <div class="stat-label">Расходы</div>
-          <div class="stat-value" id="total-expenses">0 ₽</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <h2>Куда уходят деньги</h2>
-          <span class="card-sub" id="expenseCount">0 операций</span>
-        </div>
-        <div class="donut-wrap">
-          <canvas id="expenseChart"></canvas>
-          <div class="donut-center">
-            <div class="donut-center-label">Всего</div>
-            <div class="donut-center-value" id="donutTotal">0 ₽</div>
-          </div>
-        </div>
-        <div class="group-list" id="groupList"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <h2>Последние 30 дней</h2>
-        </div>
-        <canvas id="trendChart"></canvas>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><h2>Последние операции</h2></div>
-        <div id="recent-list"></div>
-      </div>
-    </section>
-
-    <!-- ДОХОДЫ -->
-    <section class="tab-content" id="income">
-      <div class="card">
-        <div class="card-head"><h2>Добавить доход</h2></div>
-        <form id="income-form" class="form">
-          <label class="field">
-            <span>Группа</span>
-            <select name="category" required>
-              <option value="">Выбери группу</option>
-              <option value="salary">💼 Зарплата</option>
-              <option value="advance">💵 Аванс</option>
-              <option value="bonus">🎁 Премия / бонус</option>
-              <option value="freelance">💻 Фриланс / подработка</option>
-              <option value="business">🏢 Бизнес</option>
-              <option value="investment">📊 Инвестиции / дивиденды</option>
-              <option value="rent">🏠 Сдача жилья</option>
-              <option value="cashback">💳 Кэшбэк</option>
-              <option value="sale">📦 Продажа вещей</option>
-              <option value="debt">🤝 Возврат долга</option>
-              <option value="gift">🎉 Подарок</option>
-              <option value="other-income">💰 Другое</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>Сумма, ₽</span>
-            <input type="number" name="amount" inputmode="decimal" placeholder="0" required min="0" step="0.01">
-          </label>
-          <label class="field">
-            <span>Описание</span>
-            <input type="text" name="description" placeholder="Необязательно">
-          </label>
-          <label class="field">
-            <span>Дата</span>
-            <input type="date" name="date" required>
-          </label>
-          <button type="submit" class="btn btn-income">Добавить доход</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><h2>История доходов</h2></div>
-        <div id="income-list"></div>
-      </div>
-    </section>
-
-    <!-- РАСХОДЫ -->
-    <section class="tab-content" id="expenses">
-      <div class="card">
-        <div class="card-head"><h2>Добавить расход</h2></div>
-        <form id="expense-form" class="form">
-          <label class="field">
-            <span>Группа</span>
-            <select name="category" required>
-              <option value="">Выбери группу</option>
-              <optgroup label="Ежедневное">
-                <option value="food">🍕 Продукты</option>
-                <option value="cafe">☕️ Кафе и доставка</option>
-                <option value="transport">🚗 Транспорт / бензин</option>
-                <option value="taxi">🚕 Такси</option>
-              </optgroup>
-              <optgroup label="Обязательное">
-                <option value="housing">🏠 Жильё / аренда</option>
-                <option value="utilities">💡 Коммуналка</option>
-                <option value="credit">💳 Кредиты и ипотека</option>
-                <option value="cards">🔁 Платежи по картам</option>
-                <option value="phone">📱 Связь и интернет</option>
-                <option value="insurance">🛡 Страховка</option>
-                <option value="taxes">🧾 Налоги и сборы</option>
-                <option value="kids">👶 Дети / садик</option>
-              </optgroup>
-              <optgroup label="Здоровье и развитие">
-                <option value="health">💊 Здоровье / аптека</option>
-                <option value="doctors">🩺 Врачи и анализы</option>
-                <option value="sport">⚽️ Спорт и зал</option>
-                <option value="education">📚 Образование</option>
-                <option value="books">📖 Книги и курсы</option>
-              </optgroup>
-              <optgroup label="Жизнь и радость">
-                <option value="shopping">🛍 Одежда и покупки</option>
-                <option value="beauty">💄 Красота и уход</option>
-                <option value="entertainment">🎮 Развлечения</option>
-                <option value="travel">✈️ Отпуск и поездки</option>
-                <option value="pets">🐾 Питомцы</option>
-                <option value="gifts">🎁 Подарки</option>
-                <option value="charity">❤️ Помощь и донаты</option>
-              </optgroup>
-              <optgroup label="Прочее">
-                <option value="savings">🏦 Накопления</option>
-                <option value="other">📦 Другое</option>
-              </optgroup>
-            </select>
-          </label>
-          <label class="field">
-            <span>Сумма, ₽</span>
-            <input type="number" name="amount" inputmode="decimal" placeholder="0" required min="0" step="0.01">
-          </label>
-          <label class="field">
-            <span>Описание</span>
-            <input type="text" name="description" placeholder="Необязательно">
-          </label>
-          <label class="field">
-            <span>Дата</span>
-            <input type="date" name="date" required>
-          </label>
-          <button type="submit" class="btn btn-expense">Добавить расход</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><h2>История расходов</h2></div>
-        <div id="expense-list"></div>
-      </div>
-    </section>
-
-    <!-- АНАЛИЗ -->
-    <section class="tab-content" id="analytics">
-      <div class="card">
-        <div class="card-head"><h2>Расходы по группам</h2></div>
-        <div class="bars" id="barsList"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><h2>Фильтр по периоду</h2></div>
-        <div class="chips" id="periodChips">
-          <button class="chip active" data-period="all">Всё время</button>
-          <button class="chip" data-period="month">Этот месяц</button>
-          <button class="chip" data-period="7">7 дней</button>
-          <button class="chip" data-period="30">30 дней</button>
-        </div>
-        <div class="mini-stats">
-          <div class="mini-stat">
-            <div class="mini-label">Доходы</div>
-            <div class="mini-value income-text" id="filter-income">0 ₽</div>
-          </div>
-          <div class="mini-stat">
-            <div class="mini-label">Расходы</div>
-            <div class="mini-value expense-text" id="filter-expense">0 ₽</div>
-          </div>
-          <div class="mini-stat">
-            <div class="mini-label">Итог</div>
-            <div class="mini-value" id="filter-total">0 ₽</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><h2>Данные</h2></div>
-        <div class="btn-row">
-          <button class="btn btn-ghost" id="exportBtn">Экспорт в CSV</button>
-          <button class="btn btn-ghost" id="importBtn">Импорт из CSV</button>
-          <button class="btn btn-ghost danger" id="clearBtn">Очистить всё</button>
-        </div>
-        <input type="file" id="importFile" accept=".csv,text/csv" hidden>
-        <p class="hint">Данные хранятся только в этом браузере, на сервер ничего не уходит. Экспорт сохрани в заметки — это твоя резервная копия.</p>
-      </div>
-    </section>
-
-  </main>
-
-  <button class="fab" id="fab" aria-label="Быстрое добавление">+</button>
-
-  <div class="sheet-backdrop" id="sheetBackdrop"></div>
-  <div class="sheet" id="sheet">
-    <div class="sheet-handle"></div>
-    <h3>Быстрое добавление</h3>
-    <div class="quick-row">
-      <button class="quick-btn income" data-quick="income">➕ Доход</button>
-      <button class="quick-btn expense" data-quick="expense">➖ Расход</button>
-    </div>
-    <p class="hint">Откроет нужную вкладку с формой — просто заполни сумму.</p>
-  </div>
-
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Финансы</title>
+<style>
+:root{--bg:#0c0e14;--c1:#151924;--c2:#1e2433;--tx:#f1f3f9;--mut:#8b93a8;--inc:#34d399;--exp:#fb7185;--acc:#7c8cff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,"SF Pro Display",system-ui,sans-serif}
+body{padding-top:env(safe-area-inset-top);overflow:hidden}
+#app{height:100%;display:flex;flex-direction:column;max-width:560px;margin:0 auto;position:relative}
+main{flex:1;overflow-y:auto;padding:8px 16px 130px;-webkit-overflow-scrolling:touch}
+.view{display:none}.view.on{display:block;animation:fd .3s ease}
+@keyframes fd{from{opacity:0}}
+.top{display:flex;align-items:center;justify-content:space-between;padding:10px 4px 14px}
+.mon{display:flex;align-items:center;gap:6px;font-size:20px;font-weight:700}
+.mon button{background:var(--c1);border:0;color:var(--tx);width:34px;height:34px;border-radius:50%;font-size:18px}
+.dot{width:10px;height:10px;border-radius:50%;background:#555;transition:.3s}
+.dot.ok{background:var(--inc)}.dot.sync{background:#fbbf24;animation:pl 1s infinite}.dot.err{background:var(--exp)}
+@keyframes pl{50%{opacity:.3}}
+.hero{background:linear-gradient(145deg,#232a4a,#151924 70%);border-radius:28px;padding:22px;margin-bottom:14px}
+.hero small{color:var(--mut);font-size:14px}
+.hero .big{font-size:40px;font-weight:800;letter-spacing:-1px;margin:4px 0 16px}
+.row2{display:flex;gap:10px}.row2>div{flex:1;background:#ffffff0d;border-radius:16px;padding:12px}
+.row2 b{display:block;font-size:18px;margin-top:2px}
+.inc{color:var(--inc)}.exp{color:var(--exp)}
+.card{background:var(--c1);border-radius:24px;padding:18px;margin-bottom:14px}
+.card h3{margin:0 0 14px;font-size:16px}
+.donut{display:flex;align-items:center;gap:16px}
+.donut svg{width:132px;height:132px;flex:none;transform:rotate(-90deg)}
+.donut circle{fill:none;stroke-width:16;animation:dr .9s cubic-bezier(.3,.7,.2,1) both}
+@keyframes dr{from{stroke-dasharray:0 340}}
+.lg{flex:1;font-size:13px}.lg div{display:flex;align-items:center;gap:8px;margin:5px 0}
+.lg i{width:9px;height:9px;border-radius:3px;flex:none}.lg span{margin-left:auto;color:var(--mut)}
+.bars{display:flex;align-items:flex-end;gap:3px;height:110px}
+.bars div{flex:1;background:linear-gradient(var(--acc),#4b57c9);border-radius:4px 4px 2px 2px;transform-origin:bottom;animation:gr .6s ease both;min-height:2px}
+@keyframes gr{from{transform:scaleY(0)}}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:13px}
+.cal .h{color:var(--mut);font-size:11px;padding-bottom:4px}
+.cal button{background:none;border:0;color:var(--tx);height:40px;border-radius:12px;font-size:14px;position:relative;transition:.2s}
+.cal button.on{background:var(--acc);color:#fff;transform:scale(1.06)}
+.cal button.td{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.cal button i{position:absolute;bottom:4px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%}
+.dh{color:var(--mut);font-size:13px;margin:16px 4px 8px;text-transform:capitalize}
+.it{display:flex;align-items:center;gap:12px;background:var(--c1);padding:12px 14px;border-radius:18px;margin-bottom:6px;animation:fd .3s both}
+.it .ic{width:42px;height:42px;border-radius:14px;background:var(--c2);display:grid;place-items:center;font-size:20px;flex:none}
+.it .nm{flex:1;min-width:0}.it .nm b{font-weight:600;display:block}
+.it .nm small{color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.it .am{font-weight:700}
+.empty{text-align:center;color:var(--mut);padding:40px 10px}
+nav{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-around;background:#1a1f2dee;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:28px;height:66px;box-shadow:0 10px 30px #0008}
+nav button.t{background:none;border:0;color:var(--mut);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px;width:70px;transition:.2s}
+nav button.t span{font-size:22px}nav button.t.on{color:var(--tx);transform:translateY(-2px)}
+#fab{width:58px;height:58px;border-radius:50%;border:0;background:linear-gradient(135deg,#8b9bff,#5b6bf0);color:#fff;font-size:32px;margin-top:-26px;box-shadow:0 8px 24px #5b6bf088;transition:transform .2s}
+#fab:active{transform:scale(.9) rotate(90deg)}
+#ov{position:fixed;inset:0;background:#000a;opacity:0;pointer-events:none;transition:.3s;z-index:5}
+#ov.on{opacity:1;pointer-events:auto}
+#sh{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;background:var(--c1);border-radius:28px 28px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .4s cubic-bezier(.2,.9,.25,1);z-index:6}
+#sh.on{transform:none}
+.seg{display:flex;background:var(--c2);border-radius:14px;padding:4px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:none;color:var(--mut);padding:10px;border-radius:11px;font-size:15px;font-weight:600;transition:.25s}
+.seg button.on{background:var(--bg);color:var(--tx)}
+#amt{width:100%;background:none;border:0;color:var(--tx);font-size:44px;font-weight:800;text-align:center;outline:none;margin-bottom:10px}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.chips button{background:var(--c2);border:2px solid transparent;color:var(--tx);border-radius:16px;padding:10px 2px;font-size:11px;display:flex;flex-direction:column;gap:3px;align-items:center;transition:.2s}
+.chips button span{font-size:22px}.chips button.on{border-color:var(--acc);transform:scale(1.04)}
+input.f{width:100%;background:var(--c2);border:0;color:var(--tx);border-radius:14px;padding:13px;font-size:16px;margin-bottom:8px;outline:none;font-family:inherit}
+.go{width:100%;border:0;border-radius:16px;padding:16px;font-size:17px;font-weight:700;color:#fff;background:linear-gradient(135deg,#8b9bff,#5b6bf0);margin-top:4px}
+.go.sec{background:var(--c2)}
+label{display:block;color:var(--mut);font-size:13px;margin:10px 4px 5px}
+.note{color:var(--mut);font-size:13px;line-height:1.5;margin-top:12px}
+</style></head><body>
+<div id="app">
+<main>
+ <div class="top"><div class="mon"><button onclick="mv(-1)">‹</button><span id="mt"></span><button onclick="mv(1)">›</button></div><div class="dot" id="dot"></div></div>
+ <section class="view on" id="v-home"></section>
+ <section class="view" id="v-hist"></section>
+ <section class="view" id="v-set"></section>
+</main>
+<nav>
+ <button class="t on" data-t="home"><span>📊</span>Главная</button>
+ <button id="fab" onclick="openS()">+</button>
+ <button class="t" data-t="hist"><span>🧾</span>История</button>
+ <button class="t" data-t="set"><span>⚙️</span>Настройки</button>
+</nav>
 </div>
+<div id="ov" onclick="closeS()"></div>
+<div id="sh">
+ <div class="seg"><button id="b-exp" class="on" onclick="setT('exp')">Расход</button><button id="b-inc" onclick="setT('inc')">Доход</button></div>
+ <input id="amt" type="text" inputmode="decimal" placeholder="0 ₽">
+ <div class="chips" id="chips"></div>
+ <input class="f" id="dt" type="date">
+ <input class="f" id="nt" type="text" placeholder="Заметка (необязательно)">
+ <button class="go" onclick="addTx()">Сохранить</button>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const E={'Еда':'🍔','Транспорт':'🚕','Жильё':'🏠','Покупки':'🛍️','Развлечения':'🎬','Здоровье':'💊','Связь':'📱','Переводы':'💸','Кредиты':'🏦','Другое':'✨'};
+const I={'Зарплата':'💼','Подработка':'💻','Переводы':'💸','Пенсия':'🧓','Проценты':'📈','Кешбэк':'🎁','Другое':'✨'};
+const PAL=['#7c8cff','#34d399','#fb7185','#fbbf24','#38bdf8','#c084fc','#f97316','#94a3b8'];
+const MN=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+let S=JSON.parse(localStorage.fin||'{"tx":[],"del":[],"cfg":{},"dirty":0}');
+const save=()=>localStorage.fin=JSON.stringify(S);
+const n0=new Date();let Y=n0.getFullYear(),M=n0.getMonth(),day=null,tab='home',type='exp',cat='';
+const p2=n=>String(n).padStart(2,'0'),iso=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+const mk=()=>Y+'-'+p2(M+1);
+const fmt=n=>Math.round(n).toLocaleString('ru-RU')+' ₽';
+const sum=(l,t)=>l.filter(x=>x.t===t).reduce((s,x)=>s+x.a,0);
+const cats=t=>t==='inc'?I:E;
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="app.js"></script>
-</body>
-</html>
+function mv(d){M+=d;if(M<0){M=11;Y--}if(M>11){M=0;Y++}day=null;render()}
+function render(){$('#mt').textContent=MN[M]+' '+Y;({home,hist,set}[tab])()}
+
+function home(){
+ const l=S.tx.filter(x=>x.d.startsWith(mk())),inc=sum(l,'inc'),ex=sum(l,'exp'),all=sum(S.tx,'inc')-sum(S.tx,'exp');
+ const g={};l.filter(x=>x.t==='exp').forEach(x=>g[x.c]=(g[x.c]||0)+x.a);
+ const gs=Object.entries(g).sort((a,b)=>b[1]-a[1]);
+ let off=0,C=339.3,arcs='',lg='';
+ gs.forEach(([c,v],i)=>{const len=v/ex*C;arcs+=`<circle cx="66" cy="66" r="54" stroke="${PAL[i%8]}" stroke-dasharray="${Math.max(len-2,0.5)} ${C}" stroke-dashoffset="${-off}" style="animation-delay:${i*.08}s"/>`;off+=len;
+  lg+=`<div><i style="background:${PAL[i%8]}"></i>${E[c]||''} ${c}<span>${Math.round(v/ex*100)}%</span></div>`});
+ const dn=new Date(Y,M+1,0).getDate(),ds=Array(dn).fill(0);
+ l.filter(x=>x.t==='exp').forEach(x=>ds[+x.d.slice(8)-1]+=x.a);const mx=Math.max(...ds,1);
+ $('#v-home').innerHTML=`<div class="hero"><small>Общий баланс</small><div class="big">${fmt(all)}</div>
+ <div class="row2"><div><small>Доходы</small><b class="inc">+${fmt(inc)}</b></div><div><small>Расходы</small><b class="exp">−${fmt(ex)}</b></div></div></div>
+ <div class="card"><h3>Расходы по категориям</h3>${ex?`<div class="donut"><svg viewBox="0 0 132 132">${arcs}</svg><div class="lg">${lg}</div></div>`:'<div class="empty">В этом месяце трат нет</div>'}</div>
+ <div class="card"><h3>Траты по дням</h3><div class="bars">${ds.map((v,i)=>`<div style="height:${v/mx*100}%;animation-delay:${i*12}ms;${v?'':'opacity:.25'}"></div>`).join('')}</div></div>
+ <div class="card"><h3>Итог месяца</h3><b style="font-size:24px" class="${inc-ex>=0?'inc':'exp'}">${inc-ex>=0?'+':'−'}${fmt(Math.abs(inc-ex))}</b></div>`}
+
+function hist(){
+ const dn=new Date(Y,M+1,0).getDate(),first=(new Date(Y,M,1).getDay()+6)%7,td=iso(new Date());
+ const mp={};S.tx.filter(x=>x.d.startsWith(mk())).forEach(x=>{(mp[x.d]=mp[x.d]||{})[x.t]=1});
+ let cal='<div class="cal">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>`<div class="h">${d}</div>`).join('')+'<span></span>'.repeat(first);
+ for(let d=1;d<=dn;d++){const k=mk()+'-'+p2(d),m=mp[k];
+  cal+=`<button class="${day===k?'on':''} ${k===td?'td':''}" onclick="pick('${k}')">${d}${m?`<i style="background:${m.exp?'var(--exp)':'var(--inc)'}"></i>`:''}</button>`}
+ cal+='</div>';
+ const l=S.tx.filter(x=>x.d.startsWith(mk())&&(!day||x.d===day)).sort((a,b)=>b.d.localeCompare(a.d)||(b.h||'').localeCompare(a.h||'')||b.id.localeCompare(a.id));
+ let h='',last='',i=0;
+ l.forEach(x=>{if(x.d!==last){last=x.d;h+=`<div class="dh">${new Date(x.d+'T12:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'})}</div>`}
+  h+=`<div class="it" style="animation-delay:${Math.min(i++,12)*25}ms" onclick="del('${x.id}')"><div class="ic">${cats(x.t)[x.c]||'✨'}</div><div class="nm"><b>${x.c}</b><small>${x.h?x.h+' · ':''}${esc(x.n||'')}</small></div><div class="am ${x.t}">${x.t==='inc'?'+':'−'}${fmt(x.a)}</div></div>`});
+ $('#v-hist').innerHTML=`<div class="card">${cal}</div>${day?`<button class="go sec" style="margin-bottom:6px" onclick="pick(null)">Показать весь месяц</button>`:''}${h||'<div class="empty">Операций нет.<br>Нажми «+», чтобы добавить</div>'}`}
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function pick(k){day=day===k?null:k;hist()}
+function del(id){if(!confirm('Удалить операцию?'))return;S.tx=S.tx.filter(x=>x.id!==id);S.del.push(id);changed()}
+
+function set(){const c=S.cfg;
+ $('#v-set').innerHTML=`<div class="card"><h3>Синхронизация с GitHub</h3>
+ <label>Твой логин на GitHub</label><input class="f" id="c-o" value="${esc(c.owner||'')}" autocapitalize="off" autocorrect="off">
+ <label>Приватный репозиторий для данных</label><input class="f" id="c-r" value="${esc(c.repo||'')}" placeholder="finance-data" autocapitalize="off" autocorrect="off">
+ <label>Токен доступа</label><input class="f" id="c-t" type="password" value="${esc(c.token||'')}" placeholder="github_pat_..." autocapitalize="off" autocorrect="off">
+ <button class="go" onclick="saveCfg()">Сохранить и синхронизировать</button>
+ <p class="note" id="stt">${c.token?'Данные лежат в файле data.json твоего приватного репозитория.':'Пока всё хранится только на телефоне. Заполни поля — и данные поедут в приватный репозиторий.'}</p></div>
+ <div class="card"><h3>Импорт из банка</h3><p class="note" style="margin:0 0 12px">Выбери файл выписки в формате CSV. Повторная загрузка не создаёт дубли.</p>
+ <input type="file" id="fi" accept=".csv,.txt,text/csv" hidden onchange="pickFile(this)"><button class="go sec" onclick="$('#fi').click()">Выбрать файл</button></div><div id="imp"></div>`;if(IMP)impView()}
+function saveCfg(){S.cfg={owner:$('#c-o').value.trim(),repo:$('#c-r').value.trim(),token:$('#c-t').value.trim(),path:'data.json'};save();sha=null;sync(1)}
+
+// ---- добавление ----
+function setT(t){type=t;cat='';$('#b-exp').classList.toggle('on',t==='exp');$('#b-inc').classList.toggle('on',t==='inc');chips()}
+function chips(){$('#chips').innerHTML=Object.entries(cats(type)).map(([c,e])=>`<button class="${cat===c?'on':''}" onclick="cat='${c}';chips()"><span>${e}</span>${c}</button>`).join('')}
+function openS(){$('#amt').value='';$('#nt').value='';$('#dt').value=iso(new Date());setT('exp');$('#ov').classList.add('on');$('#sh').classList.add('on');setTimeout(()=>$('#amt').focus(),350)}
+function closeS(){$('#ov').classList.remove('on');$('#sh').classList.remove('on');document.activeElement.blur()}
+function addTx(){const a=parseFloat($('#amt').value.replace(/\s/g,'').replace(',','.'));
+ if(!(a>0)){$('#amt').focus();return}
+ S.tx.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),t:type,a,c:cat||Object.keys(cats(type))[0],d:$('#dt').value||iso(new Date()),n:$('#nt').value.trim()});
+ const d=S.tx[S.tx.length-1].d;Y=+d.slice(0,4);M=+d.slice(5,7)-1;day=null;closeS();changed()}
+function changed(){S.dirty=1;save();render();clearTimeout(tm);tm=setTimeout(()=>sync(),700)}
+
+// ---- импорт из банка (CSV ВТБ) ----
+const ME={'Супермаркеты':'Еда','Кафе и рестораны':'Еда','АЗС':'Транспорт','Транспорт':'Транспорт','Дом и ремонт':'Жильё','Коммунальные услуги':'Жильё','Сотовая связь':'Связь','Услуги связи':'Связь','Развлечения':'Развлечения','Цифровой контент':'Развлечения','Экосистемы':'Развлечения','Здоровье':'Здоровье','Аптеки':'Здоровье','Электроника':'Покупки','Детские товары':'Покупки','Книги и канцтовары':'Покупки','Маркетплейсы':'Покупки','Переводы людям':'Переводы','Платежи и переводы':'Переводы','Кредит':'Кредиты'};
+const MI={'Входящие переводы':'Переводы','Платежи и переводы':'Переводы','Пенсионные зачисления':'Пенсия','Кешбэк':'Кешбэк'};
+let IMP=null;
+function csv(t){const r=[];let row=[],f='',q=0;for(let i=0;i<t.length;i++){const c=t[i];
+ if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=0}else f+=c}
+ else if(c=='"')q=1;else if(c==';'){row.push(f);f=''}else if(c=='\n'){row.push(f);r.push(row);row=[];f=''}else if(c!='\r')f+=c}
+ if(f||row.length){row.push(f);r.push(row)}return r}
+const hs=s=>{let h=5381;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return h.toString(36)};
+function parseBank(txt){const r=csv(txt.replace(/^\uFEFF/,'')),h=r.shift().map(s=>s.trim()),seen={},out=[];let rej=0;
+ const g=(x,n)=>(x[h.indexOf(n)]||'').trim();
+ r.forEach(x=>{if(x.length<8)return;const dt=g(x,'Дата и время операции'),m=dt.match(/(\d\d)\.(\d\d)\.(\d{4})\s*(\d\d:\d\d)?/);if(!m)return;
+  if(g(x,'Статус операции').includes('отклонен')){rej++;return}
+  const a=Math.abs(parseFloat((g(x,'Сумма в валюте счёта')||g(x,'Сумма в валюте операции')).replace(/\s/g,'').replace(',','.')));if(!(a>0))return;
+  const dr=g(x,'Списание/Зачисление')=='Зачисление'?'inc':'exp',ct=g(x,'Категория'),ty=g(x,'Тип операции'),nm=g(x,'Наименование операции');
+  const c=dr=='exp'?(ME[ct]||'Другое'):(MI[ct]||(/годовых/.test(ty)?'Проценты':'Другое'));
+  const k=hs([dt,a,dr,nm,g(x,'Номер счёта/Кредитного договора'),g(x,'Карта')].join('|'));seen[k]=(seen[k]||0)+1;
+  out.push({id:'i'+k+seen[k],t:dr,a,c,d:m[3]+'-'+m[2]+'-'+m[1],h:m[4]||'',n:nm,own:ct=='Между счетами'||ty=='Между своими счетами'})});
+ return{out,rej,skip:true}}
+async function pickFile(inp){const f=inp.files[0];if(!f)return;const b=await f.arrayBuffer();let t;
+ try{t=new TextDecoder('utf-8',{fatal:true}).decode(b)}catch(e){t=new TextDecoder('windows-1251').decode(b)}
+ IMP=parseBank(t);inp.value='';
+ if(!IMP.out.length){IMP=null;$('#imp').innerHTML='<div class="card"><p class="note" style="margin:0">Не нашёл операций в этом файле. Нужна выписка в формате CSV из банка.</p></div>';return}
+ impView()}
+function impView(){const{out,rej,skip}=IMP,have=new Set(S.tx.map(x=>x.id)),dl=new Set(S.del),ok=out.filter(x=>!(skip&&x.own)),nw=ok.filter(x=>!have.has(x.id)&&!dl.has(x.id));
+ IMP.nw=nw;
+ $('#imp').innerHTML=`<div class="card"><h3>Найдено в файле</h3><p class="note" style="margin:0 0 12px;color:var(--tx)">Новых операций: <b>${nw.length}</b><br>Доходы: <b class="inc">+${fmt(sum(nw,'inc'))}</b><br>Расходы: <b class="exp">−${fmt(sum(nw,'exp'))}</b></p>
+ <p class="note" style="margin:0 0 12px">Пропущено: отклонённых ${rej}, уже добавленных ${ok.length-nw.length}${skip?', переводов между своими счетами '+out.filter(x=>x.own).length:''}</p>
+ <label style="display:flex;gap:10px;align-items:center;color:var(--tx);font-size:14px"><input type="checkbox" ${skip?'checked':''} onchange="IMP.skip=this.checked;impView()" style="width:20px;height:20px">Не считать переводы между своими счетами</label>
+ <button class="go" ${nw.length?'':'disabled'} onclick="impGo()">Добавить ${nw.length} операций</button></div>`}
+function impGo(){const nw=IMP.nw.map(({own,...x})=>x);S.tx.push(...nw);const d=nw.map(x=>x.d).sort().pop();IMP=null;
+ Y=+d.slice(0,4);M=+d.slice(5,7)-1;day=null;document.querySelector('[data-t=hist]').click();changed()}
+
+// ---- GitHub ----
+let sha=null,busy=0,tm;
+const enc=s=>btoa(unescape(encodeURIComponent(s))),dec=s=>decodeURIComponent(escape(atob(s.replace(/\n/g,''))));
+const dot=c=>$('#dot').className='dot '+c;
+const gh=(m,b)=>{const c=S.cfg;return fetch(`https://api.github.com/repos/${c.owner}/${c.repo}/contents/data.json`+(m==='GET'?'?t='+Date.now():''),{method:m,headers:{Authorization:'Bearer '+c.token,Accept:'application/vnd.github+json'},body:b&&JSON.stringify(b),cache:'no-store'})};
+async function pull(){const r=await gh('GET');if(r.status===404){sha=null;return}if(!r.ok)throw r.status;const j=await r.json();sha=j.sha;const d=JSON.parse(dec(j.content));
+ const del=new Set([...S.del,...(d.del||[])]),m=new Map();[...(d.tx||[]),...S.tx].forEach(x=>m.set(x.id,x));
+ S.del=[...del];S.tx=[...m.values()].filter(x=>!del.has(x.id));save()}
+async function push(retry){const b={message:'sync '+new Date().toISOString(),content:enc(JSON.stringify({tx:S.tx,del:S.del}))};if(sha)b.sha=sha;
+ const r=await gh('PUT',b);if((r.status===409||r.status===422)&&!retry){await pull();return push(1)}
+ if(!r.ok)throw r.status;sha=(await r.json()).content.sha;S.dirty=0;save()}
+async function sync(manual){const c=S.cfg;if(!c.token||!c.owner||!c.repo){dot('');return}if(busy)return;busy=1;dot('sync');
+ try{await pull();if(S.dirty||manual)await push();dot('ok');render();if(manual&&$('#stt'))$('#stt').textContent='Готово ✓ Данные синхронизированы'}
+ catch(e){dot('err');if($('#stt'))$('#stt').textContent='Ошибка '+e+(e==404||e==401||e==403?': проверь логин, название репозитория и права токена':'')}
+ busy=0}
+
+document.querySelectorAll('nav .t').forEach(b=>b.onclick=()=>{tab=b.dataset.t;document.querySelectorAll('nav .t').forEach(x=>x.classList.toggle('on',x===b));
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+tab));$('main').scrollTop=0;render()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+render();sync();
+</script></body></html>
