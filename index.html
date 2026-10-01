@@ -124,7 +124,9 @@ const fmt=n=>Math.round(n).toLocaleString('ru-RU')+' ₽';
 const sum=(l,t)=>l.filter(x=>x.t===t).reduce((s,x)=>s+x.a,0);
 const cats=t=>t==='inc'?I:E;
 
-function mv(d){M+=d;if(M<0){M=11;Y--}if(M>11){M=0;Y++}day=null;render()}
+let navd=0;
+function jump(){if(navd||!S.tx.length||S.tx.some(x=>x.d.startsWith(mk())))return 0;const d=S.tx.map(x=>x.d).sort().pop();Y=+d.slice(0,4);M=+d.slice(5,7)-1;day=null;return 1}
+function mv(d){navd=1;M+=d;if(M<0){M=11;Y--}if(M>11){M=0;Y++}day=null;render()}
 function render(){$('#mt').textContent=MN[M]+' '+Y;({home,hist,set}[tab])()}
 
 function home(){
@@ -294,7 +296,7 @@ async function push(retry){const b={message:'sync '+new Date().toISOString(),con
  if(!r.ok)throw r.status;sha=(await r.json()).content.sha;S.dirty=0;save()}
 async function sync(manual){const c=S.cfg;if(!c.token||!c.owner||!c.repo){dot('');return}if(busy)return;busy=1;dot('sync');
  const sg=()=>S.tx.length+'|'+S.del.length+'|'+S.imp.length,b0=sg();
- try{await pull();if(S.dirty||manual)await push();dot('ok');if(manual||(sg()!==b0&&!(tab==='set'&&document.activeElement.tagName==='INPUT')))render();if(manual&&$('#stt'))$('#stt').textContent='Готово ✓ Данные синхронизированы'}
+ try{await pull();const jm=jump();if(S.dirty||manual)await push();dot('ok');if(manual||jm||(sg()!==b0&&!(tab==='set'&&document.activeElement.tagName==='INPUT')))render();if(manual&&$('#stt'))$('#stt').textContent='Готово ✓ Данные синхронизированы'}
  catch(e){dot('err');if($('#stt'))$('#stt').textContent='Ошибка '+e+(e==404||e==401||e==403?': проверь логин, название репозитория и права токена':'')}
  busy=0}
 
@@ -303,5 +305,5 @@ document.querySelectorAll('nav .t').forEach(b=>b.onclick=()=>{tab=b.dataset.t;do
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});
 setInterval(()=>{if(!document.hidden)sync()},25000);
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-render();sync();
+jump();render();sync();
 </script></body></html>
