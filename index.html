@@ -127,7 +127,7 @@ const cats=t=>t==='inc'?I:E;
 let navd=0;
 function jump(){if(navd||!S.tx.length||S.tx.some(x=>x.d.startsWith(mk())))return 0;const d=S.tx.map(x=>x.d).sort().pop();Y=+d.slice(0,4);M=+d.slice(5,7)-1;day=null;return 1}
 function mv(d){navd=1;M+=d;if(M<0){M=11;Y--}if(M>11){M=0;Y++}day=null;render()}
-function render(){$('#mt').textContent=MN[M]+' '+Y;({home,hist,set}[tab])()}
+function render(){fixCred();$('#mt').textContent=MN[M]+' '+Y;({home,hist,set}[tab])()}
 
 function home(){
  const l=S.tx.filter(x=>x.d.startsWith(mk())),inc=sum(l,'inc'),ex=sum(l,'exp'),all=sum(S.tx,'inc')-sum(S.tx,'exp');
@@ -197,7 +197,7 @@ function parseBank(txt){const r=csv(txt.replace(/^\uFEFF/,'')),h=r.shift().map(s
   if(g(x,'Статус операции').includes('отклонен')){rej++;return}
   const a=Math.abs(parseFloat((g(x,'Сумма в валюте счёта')||g(x,'Сумма в валюте операции')).replace(/\s/g,'').replace(',','.')));if(!(a>0))return;
   const dr=g(x,'Списание/Зачисление')=='Зачисление'?'inc':'exp',ct=g(x,'Категория'),ty=g(x,'Тип операции'),nm=g(x,'Наименование операции');
-  const c=dr=='exp'?(ME[ct]||'Другое'):(MI[ct]||(/годовых/.test(ty)?'Проценты':'Другое'));
+  const c=isCr(dr,nm,a)?'Кредиты':dr=='exp'?(ME[ct]||'Другое'):(MI[ct]||(/годовых/.test(ty)?'Проценты':'Другое'));
   out.push({t:dr,a,c,d:m[3]+'-'+m[2]+'-'+m[1],h:m[4]||'',n:nm,own:ct=='Между счетами'||ty=='Между своими счетами'})});
  return{out,rej,skip:true}}
 const fp=x=>[x.d,x.h,x.a,x.t,x.n].join('|');
@@ -207,7 +207,10 @@ const XLU='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
 const lib=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=()=>no('нужен интернет, чтобы загрузить модуль чтения');document.head.appendChild(s)});
 const KE=[[/пят[её]рочк|магнит|лент[аы]|перекр[её]ст|вкусвилл|дикси|ашан|супермаркет|продукт|кафе|ресторан|coffee|кофе|pizza|пицц|burger|kfc|макдон|яндекс.?еда|delivery|самокат|пекарн/i,'Еда'],[/такси|метро|азс|лукойл|роснефть|газпромнефть|парковк|транспорт|ржд|аэрофлот|каршеринг/i,'Транспорт'],[/аптек|клиник|медицин|стоматолог|здоровь/i,'Здоровье'],[/мтс|билайн|мегафон|теле2|tele2|связь|интернет|ростелеком/i,'Связь'],[/кино|netflix|spotify|okko|кинопоиск|театр|игр[аы]|steam|подписк/i,'Развлечения'],[/wildberries|ozon|озон|lamoda|dns|м\.?видео|эльдорадо|aliexpress|маркетплейс|одежд|обув/i,'Покупки'],[/жкх|коммунал|квартплат|электроэнерг|аренд|ремонт|ипотек/i,'Жильё'],[/кредит|займ|рассрочк/i,'Кредиты'],[/перевод|сбп/i,'Переводы']];
 const KI=[[/зарплат|аванс|заработн/i,'Зарплата'],[/процент/i,'Проценты'],[/кешб|кэшб|cashback/i,'Кешбэк'],[/пенси/i,'Пенсия'],[/перевод|сбп/i,'Переводы']];
-const gc=(t,s)=>{const r=(t=='inc'?KI:KE).find(k=>k[0].test(s||''));return r?r[1]:'Другое'};
+const CRA=[32458,48842],CRT=4200;
+const isCr=(t,s,a)=>t=='exp'&&(CRA.includes(Math.round(a))||(Math.round(a)==CRT&&/перевод/i.test(s||'')));
+const gc=(t,s,a)=>{if(isCr(t,s,a))return'Кредиты';const r=(t=='inc'?KI:KE).find(k=>k[0].test(s||''));return r?r[1]:'Другое'};
+function fixCred(){let ch=0;S.tx.forEach(x=>{if(x.c!='Кредиты'&&(x.c=='Другое'||x.c=='Переводы')&&isCr(x.t,x.n,x.a)){x.c='Кредиты';ch=1}});if(ch){S.dirty=1;save()}}
 const kw=s=>/зачисл|поступл|пополнен|входящ|возврат|кешб|кэшб|cashback|зарплат|аванс|выплат|пенси|процент|(?:^|\s)от\s+[А-ЯЁ][а-яё]+(\s+[А-ЯЁ][а-яё]+)?\s+[А-ЯЁ]\./i.test(s||'');
 const own=s=>/между своими|между счетами|собственн\S* счет|перевод между/i.test(s||'');
 const sr=c=>String(c==null?'':c).trim();
@@ -226,7 +229,7 @@ function fromRows(rows){const low=r=>r.map(c=>sr(c).toLowerCase()),AM=/сумм|
  body.forEach(r=>{const dt=pd(r[di]);if(!dt)return;const n=ds.map(i=>sr(r[i])).filter(Boolean).join(' · ').slice(0,60);let a,t;
   if(two){const p=num(r[ci]),q=num(r[xi]);if(p>0){a=p;t='inc'}else if(q>0){a=q;t='exp'}else return}
   else{const v=num(r[ai]);if(!v)return;a=Math.abs(v);t=v<0?'exp':(neg||!kw(n)?(neg?'inc':'exp'):'inc')}
-  out.push({t,a,c:gc(t,n),d:dt.d,h:dt.h,n,own:own(n)})});
+  out.push({t,a,c:gc(t,n,a),d:dt.d,h:dt.h,n,own:own(n)})});
  return{out,rej:0,generic:1}}
 function fromLines(lines){const bl=[],ds=/^\s*(\d{2}[.\/]\d{2}[.\/]\d{2,4})(?:\s+(\d{1,2}:\d{2}))?/;
  lines.forEach(l=>{const m=l.match(ds);if(m&&pd(m[1])){bl.push({d:m[1],h:m[2]||'',tx:l.slice(m[0].length)})}else if(bl.length&&!/^\s*(стр|страница|page)(?=\s|\.|$)/i.test(l))bl[bl.length-1].tx+=' '+l});
@@ -235,7 +238,7 @@ function fromLines(lines){const bl=[],ds=/^\s*(\d{2}[.\/]\d{2}[.\/]\d{2,4})(?:\s
   const a=parseFloat(m[2].replace(/[\s\u00a0]/g,'')+'.'+m[3]);if(!(a>0))return;
   const n=tx.replace(new RegExp(AR.source,'g'),' ').replace(/₽|руб\.?|RUB|RUR|(?:^|\s)р\.?(?=\s|$)/gi,' ').replace(/\s[+\-−–](?=\s|$)/g,' ').replace(/\s+/g,' ').trim().slice(0,60);
   const t=/[-−–]/.test(m[1])?'exp':m[1]=='+'?'inc':(kw(tx)?'inc':'exp'),dt=pd(b.d);
-  out.push({t,a,c:gc(t,n),d:dt.d,h:b.h?p2(b.h.split(':')[0])+':'+b.h.split(':')[1]:'',n,own:own(tx)})});
+  out.push({t,a,c:gc(t,n,a),d:dt.d,h:b.h?p2(b.h.split(':')[0])+':'+b.h.split(':')[1]:'',n,own:own(tx)})});
  return{out,rej:0,generic:1}}
 async function fromPdf(buf){
  if(!window.pdfjsLib){await lib(PDU);const w=await(await fetch(PDW)).text();pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(new Blob([w],{type:'text/javascript'}))}
@@ -255,7 +258,7 @@ async function pickFile(inp){const f=inp.files[0];if(!f)return;const ext=f.name.
    r=/Статус операции/.test(t)&&/Списание\/Зачисление/.test(t)?parseBank(t):fromRows(csvAuto(t))}
   if(!r.out.length)throw 0;IMP=r;IMP.name=f.name;IMP.skip=true;inp.value='';impView()}
  catch(e){IMP=null;inp.value='';box.innerHTML=`<div class="card"><p class="note" style="margin:0">Не получилось найти операции в этом файле${typeof e=='string'?' ('+e+')':''}. Попробуй выписку в Excel или CSV. Если нужен именно этот банк, пришли мне пример файла (без личных данных), и я подстрою чтение.</p></div>`}}
-function impView(){const{rej,skip}=IMP,out=IMP.flip?IMP.out.map(x=>{const t=x.t=='inc'?'exp':'inc';return{...x,t,c:gc(t,x.n)}}):IMP.out,cnt={},sn={};S.tx.forEach(x=>{if(x.h||x.b){const f=fp(x);cnt[f]=(cnt[f]||0)+1}});
+function impView(){const{rej,skip}=IMP,out=IMP.flip?IMP.out.map(x=>{const t=x.t=='inc'?'exp':'inc';return{...x,t,c:gc(t,x.n,x.a)}}):IMP.out,cnt={},sn={};S.tx.forEach(x=>{if(x.h||x.b){const f=fp(x);cnt[f]=(cnt[f]||0)+1}});
  const ok=out.filter(x=>!(skip&&x.own)),nw=ok.filter(x=>{const f=fp(x);sn[f]=(sn[f]||0)+1;return sn[f]>(cnt[f]||0)});IMP.nw=nw;
  $('#imp').innerHTML=`<div class="card"><h3>Найдено в файле</h3><p class="note" style="margin:0 0 12px;color:var(--tx)">Новых операций: <b>${nw.length}</b><br>Доходы: <b class="inc">+${fmt(sum(nw,'inc'))}</b><br>Расходы: <b class="exp">−${fmt(sum(nw,'exp'))}</b></p>
  <p class="note" style="margin:0 0 12px">Пропущено: отклонённых ${rej}, уже добавленных ${ok.length-nw.length}${skip?', переводов между своими счетами '+out.filter(x=>x.own).length:''}</p>
